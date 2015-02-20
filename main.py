@@ -3,44 +3,64 @@ Created on Feb 19, 2015
 
 @author: Ankur
 '''
-import pygame, math
+import pygame, math,random
 import numpy as np
 
-white=(255,255,255)
-blue = (0,255,255)
-red = (255,0,0)
-width,height = (513,513)
+class Color():
+    white=(255,255,255)
+    blue = (0,255,255)
+    red = (255,0,0)
+    snow = (205,201,201)
+    palegreen= (152,251,152)
+
+    def __init__(self):
+        pass
+
+    def randomcolor(self):
+        randcolor = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
+        return randcolor
+    
+    
+width,height = (700,530)
 screen =  pygame.display.set_mode((width, height))
 debug = False
 
-class Ball():
-    def __init__(self,(x,y),size,width,color):
-        
-        self.x,self.y = x,y
-        self.size = size
-        self.width = width
-        self.color = color
-        
+class Ball(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("./resource/ball.gif")
+        self.rect = self.image.get_rect()     
+        self.rect.center = (266,266)
+     
+    def update(self):
+        global screen
+        screen.blit(self.image, self.rect)
+    
+    
     def display(self):
         global screen
         
-        pygame.draw.circle(screen, self.color, (self.x,self.y), self.size, self.width)
+        #pygame.draw.circle(screen, self.color, (self.x,self.y), self.size, self.width)
  
 
 class Background():
     def __init__(self,(x,y),size,width,color):
+        self.colorobj = Color()
         
-        self.x,self.y = x,y
         self.size = size
         self.width = width
         self.color = color
         self.myimage = pygame.image.load("./resource/bg4.png")
         self.imagerect = self.myimage.get_rect()
+        self.imagerect.x,self.imagerect.y = ( 10, 10)
+        self.x,self.y = self.imagerect.center
          
         
-    def display(self):
+    def update(self):
         global screen
         screen.blit(self.myimage, self.imagerect)
+        #use it to produce game-over effects for few seconds
+        #self.color = self.colorobj.randomcolor()
         pygame.draw.circle(screen, self.color, (self.x,self.y), self.size, self.width)
 
 class Bat(pygame.sprite.Sprite):
@@ -50,8 +70,8 @@ class Bat(pygame.sprite.Sprite):
         self.color = color
         self.width = width
         self.image = pygame.Surface(batdimension)
-        self.image.fill(white)
-        self.image.set_colorkey(white)
+        self.image.fill(Color.white)
+        self.image.set_colorkey(Color.white)
         
         self.x= 0
         self.y =0
@@ -66,7 +86,7 @@ class Bat(pygame.sprite.Sprite):
         self.rot = pygame.transform.rotate(self.image,self.angle )
         
         self.rect = self.rot.get_rect()
-        self.rect.center = (253,253)
+        self.rect.center = (266,266)
      
     
     def findPointOnCircle(self,deg):
@@ -74,8 +94,8 @@ class Bat(pygame.sprite.Sprite):
         Give an angle in degrees and we will get a corresponding point on circle w.r.t to this angle in clockwise.
         """
         rad = np.deg2rad(deg)
-        y = 253- 253 * math.sin(rad)
-        x = 253+ 253 * math.cos(rad)
+        y = 266 - 250 * math.sin(rad)
+        x = 266 + 250 * math.cos(rad)
         return int(x),int(y)
     
     def update(self):
@@ -109,6 +129,7 @@ class CMain():
         self.bat1 = None
         self.bat2 = None
         self.gamestate = None
+        self.color = Color()
         pygame.init()
         pygame.joystick.init()
         self.joystickCount = pygame.joystick.get_count()
@@ -122,11 +143,13 @@ class CMain():
         self.gamestate = GameState.STOPPED
         
         running = True
-        backg = Background((width/2,height/2),253,3,blue)
-        bat1 = Bat(red,(10,90),(512,253),0.5)
-        bat2 = Bat(blue,(10,50),(0,253),-2)
+        backg = Background((width/2,height/2),253,5,Color.palegreen)
+        bat1 = Bat(Color.red,(10,90),(512,253),0.5)
+        bat2 = Bat(Color.blue,(10,50),(0,253),-2)
+        ball = Ball()
         all_sprites.add(bat1)
         all_sprites.add(bat2)
+        all_sprites.add(ball)
         clock = pygame.time.Clock()
         while running:
             for event in pygame.event.get():
@@ -154,11 +177,12 @@ class CMain():
                         elif(jy_bat1_vertical < 0): 
                             print "vertical negative"   
                 
-            screen.fill(white)  
-            backg.display()
+            screen.fill(Color.white)
+            backg.update()  
             all_sprites.update()
             pygame.display.flip()
             clock.tick(60)
+            
         pygame.quit()           
                 
 if __name__ == "__main__":
