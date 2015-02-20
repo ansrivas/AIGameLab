@@ -75,7 +75,7 @@ class Bat(pygame.sprite.Sprite):
         
         self.x= 0
         self.y =0
-        self.angle = 0
+        self.angle = 1
         self.theta =  0 
         self.speed = speed
         self.batdimx, self.batdimy = batdimension
@@ -100,17 +100,23 @@ class Bat(pygame.sprite.Sprite):
     
     def update(self):
         global screen
-        self.theta += self.speed
+        #self.theta += self.speed
         if(self.theta > 360):
             self.theta = 0
-        self.angle  = self.theta - (self.batdimx/213)
+        self.angle  = float(self.theta) - float(self.batdimx/213)
         
         self.rot = pygame.transform.rotate(self.image,self.angle)
         self.rect = self.rot.get_rect()
         self.rect.center = self.findPointOnCircle(self.theta)
         screen.blit(self.rot,self.rect)
-        
-        
+    
+    def moveBat(self,js_hor,js_vert):
+        print self.angle , js_hor, js_vert 
+        if(js_vert < -0.1):
+            self.theta += self.speed 
+        if(js_vert >0.0 ):
+            self.theta -=self.speed
+            
            
     def display(self):
         global screen
@@ -144,8 +150,8 @@ class CMain():
         
         running = True
         backg = Background((width/2,height/2),253,5,Color.palegreen)
-        bat1 = Bat(Color.red,(10,90),(512,253),0.5)
-        bat2 = Bat(Color.blue,(10,50),(0,253),-2)
+        bat1 = Bat(Color.red,(10,90),(512,253),10)
+        bat2 = Bat(Color.blue,(10,50),(0,253),-5)
         ball = Ball()
         all_sprites.add(bat1)
         all_sprites.add(bat2)
@@ -164,19 +170,25 @@ class CMain():
                     
                 if event.type == pygame.JOYAXISMOTION:
                     if(self.gamestate == GameState.RUNNING):
-                        jy_bat1_horizontal = self.bat1.get_axis(0)
-                        jy_bat1_vertical = self.bat1.get_axis(1)
-                        
+                        jy_bat1_horizontal =  (self.bat1.get_axis(0))
+                        jy_bat1_vertical =  (self.bat1.get_axis(1))
+                        #print jy_bat1_horizontal,jy_bat1_vertical
                        
-                        if(jy_bat1_horizontal < 0):
+                        bat1.moveBat(jy_bat1_horizontal, jy_bat1_vertical)
+                        #just clearing the variables
+                        jy_bat1_horizontal = 0
+                        jy_bat1_vertical  = 0
+                        '''
+                        if(jy_bat1_horizontal < 0 ):
+                            
                             print "horizontal negative"
-                        elif(jy_bat1_horizontal > 0):
+                        elif(jy_bat1_horizontal > 0 ):
                             print "horizontal positive"
-                        if(jy_bat1_vertical > 0):
+                        elif( jy_bat1_vertical <0 ):
                             print "vertical positive"
-                        elif(jy_bat1_vertical < 0): 
+                        elif(jy_bat1_vertical >0 ):
                             print "vertical negative"   
-                
+                        '''
             screen.fill(Color.white)
             backg.update()  
             all_sprites.update()
