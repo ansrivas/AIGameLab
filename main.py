@@ -111,7 +111,7 @@ class Bat(pygame.sprite.Sprite):
         screen.blit(self.rot,self.rect)
     
     def moveBat(self,js_hor,js_vert):
-        print self.angle , js_hor, js_vert 
+        #here took -0.1 since the buffer is not being cleared properly, values is being set to -0.000003
         if(js_vert < -0.1):
             self.theta += self.speed 
         if(js_vert >0.0 ):
