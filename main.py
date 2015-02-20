@@ -31,12 +31,28 @@ class Ball(pygame.sprite.Sprite):
         self.image = pygame.image.load("./resource/ball.gif")
         self.rect = self.image.get_rect()     
         self.rect.center = (266,266)
+        #lets randomize the start point of the ball
+        self.rect.center = (random.randint(1,512),random.randint(1,512))
+        self.speed = 2
+        
      
     def update(self):
         global screen
+        self.rect.x +=self.speed
+        self.rect.y +=self.speed
         screen.blit(self.image, self.rect)
+        self.collisionwithcircle()
     
-    
+
+    def collisionwithcircle(self):
+        dx,dy = (self.rect.centerx -266,self.rect.centery-266)
+        dist = (dx**2 +dy**2)**0.5 
+        
+        if(dist >= 250 - self.rect.size[0]/2 +1):
+            print "collision"
+            self.speed = -self.speed
+            tangent = math.atan2(dy, dx)
+            
     def display(self):
         global screen
         
