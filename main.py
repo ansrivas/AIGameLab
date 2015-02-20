@@ -36,6 +36,7 @@ class Background():
         self.color = color
         self.myimage = pygame.image.load("./resource/bg4.png")
         self.imagerect = self.myimage.get_rect()
+         
         
     def display(self):
         global screen
@@ -69,7 +70,9 @@ class Bat(pygame.sprite.Sprite):
      
     
     def findPointOnCircle(self,deg):
-        
+        """
+        Give an angle in degrees and we will get a corresponding point on circle w.r.t to this angle in clockwise.
+        """
         rad = np.deg2rad(deg)
         y = 253- 253 * math.sin(rad)
         x = 253+ 253 * math.cos(rad)
@@ -78,6 +81,8 @@ class Bat(pygame.sprite.Sprite):
     def update(self):
         global screen
         self.theta += self.speed
+        if(self.theta > 360):
+            self.theta = 0
         self.angle  = self.theta - (self.batdimx/213)
         
         self.rot = pygame.transform.rotate(self.image,self.angle)
@@ -96,10 +101,14 @@ class Bat(pygame.sprite.Sprite):
 all_sprites = pygame.sprite.Group()
 
 
+class GameState:
+    RUNNING, PAUSED, RESETTED, STOPPED = range(0, 4) 
+
 class CMain():
     def __init__(self):
         self.bat1 = None
         self.bat2 = None
+        self.gamestate = None
         pygame.init()
         pygame.joystick.init()
         self.joystickCount = pygame.joystick.get_count()
@@ -109,6 +118,9 @@ class CMain():
         
         
     def main(self):
+        
+        self.gamestate = GameState.STOPPED
+        
         running = True
         backg = Background((width/2,height/2),253,3,blue)
         bat1 = Bat(red,(10,90),(512,253),0.5)
@@ -121,22 +133,26 @@ class CMain():
                 if event.type == pygame.QUIT:
                     running = False
                 if event.type == pygame.JOYBUTTONDOWN:
-                    #Set the joystick instance of PacMan
-                    self.bat1 = pygame.joystick.Joystick(event.joy)
+                    if(self.gamestate == GameState.STOPPED):
+                        self.gamestate = GameState.RUNNING
+                        #when the player presses start button then the joystick gets activated
+                        #game state will change here to started.
+                        self.bat1 = pygame.joystick.Joystick(event.joy)
                     
                 if event.type == pygame.JOYAXISMOTION:
-                    jy_bat1_horizontal = self.bat1.get_axis(0)
-                    jy_bat1_vertical = self.bat1.get_axis(1)
-                    
-                   
-                    if(jy_bat1_horizontal < 0):
-                        print "horizontal negative"
-                    elif(jy_bat1_horizontal > 0):
-                        print "horizontal positive"
-                    if(jy_bat1_vertical > 0):
-                        print "vertical positive"
-                    elif(jy_bat1_vertical < 0): 
-                        print "vertical negative"   
+                    if(self.gamestate == GameState.RUNNING):
+                        jy_bat1_horizontal = self.bat1.get_axis(0)
+                        jy_bat1_vertical = self.bat1.get_axis(1)
+                        
+                       
+                        if(jy_bat1_horizontal < 0):
+                            print "horizontal negative"
+                        elif(jy_bat1_horizontal > 0):
+                            print "horizontal positive"
+                        if(jy_bat1_vertical > 0):
+                            print "vertical positive"
+                        elif(jy_bat1_vertical < 0): 
+                            print "vertical negative"   
                 
             screen.fill(white)  
             backg.display()
