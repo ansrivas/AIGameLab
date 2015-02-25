@@ -35,28 +35,38 @@ class Ball(pygame.sprite.Sprite):
         #this is the first position from where the ball would be loaded, 
         #need to randomize it   
         self.rect.centerx,self.rect.centery = (100,100)
-        self.speedx = 1
+        self.speedx = 0.5
         self.speedy = 2
         self.angle = math.pi/2
         
      
     def update(self):
         global screen
-        self.rect.x +=self.speedx
-        self.rect.y +=self.speedy
-        #self.rect.x += math.sin(self.angle) * self.speedx
-        #self.rect.y -= math.cos(self.angle) * self.speedy
+        #check if adding this speed makes the coordinates go beyond the limits of circle
+        radius = 250
+        dist = math.hypot(self.rect.x+self.speedx - 266 ,self.rect.y+self.speedy -266)
+        
+        if(dist < radius):
+            
+            self.rect.x +=self.speedx
+            self.rect.y +=self.speedy
+        else:
+            #fix the position here
+
+            print "reaching outside------------>"
         screen.blit(self.image, self.rect)
         self.collisionwithcircle()
     
 
     def collisionwithcircle(self):
         #this the direction vector of the ball
-        dx,dy = (self.rect.centerx -266,self.rect.centery-266)
+        dx,dy = (self.rect.centerx -266,self.rect.centery-266)        
+        #dx and dy are the direction vectors from center of circle
+         
         dist = (dx**2 +dy**2)**0.5 
         maxdist = 250 - self.rect.size[0]/2 +1
-        print dist, maxdist
-        #dx and dy are the direction vectors from center of circle 
+        
+        #print dist, maxdist, self.rect.center
         # self.speedx , self.speedy are the velocity vectors
         if(dist > maxdist): 
             print "collision occurred"
@@ -68,6 +78,7 @@ class Ball(pygame.sprite.Sprite):
             dotproduct = self.speedx*unitvectorx + self.speedy*unitvectory
             self.speedx = -2*dotproduct*unitvectorx + self.speedx
             self.speedy = -2*dotproduct*unitvectory + self.speedy
+            print self.speedx, self.speedy
 
             
     def display(self):
