@@ -5,6 +5,7 @@ Created on Feb 19, 2015
 '''
 import pygame, math,random
 import numpy as np
+from sympy.mpmath import unitvector
 
 class Color():
     white=(255,255,255)
@@ -25,33 +26,49 @@ width,height = (700,530)
 screen =  pygame.display.set_mode((width, height))
 debug = False
 
+
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("./resource/ball.gif")
-        self.rect = self.image.get_rect()     
-        self.rect.center = (266,266)
-        #lets randomize the start point of the ball
-        self.rect.center = (random.randint(1,512),random.randint(1,512))
-        self.speed = 2
+        self.rect = self.image.get_rect()  
+        #this is the first position from where the ball would be loaded, 
+        #need to randomize it   
+        self.rect.centerx,self.rect.centery = (100,100)
+        self.speedx = 1
+        self.speedy = 2
+        self.angle = math.pi/2
         
      
     def update(self):
         global screen
-        self.rect.x +=self.speed
-        self.rect.y +=self.speed
+        self.rect.x +=self.speedx
+        self.rect.y +=self.speedy
+        #self.rect.x += math.sin(self.angle) * self.speedx
+        #self.rect.y -= math.cos(self.angle) * self.speedy
         screen.blit(self.image, self.rect)
         self.collisionwithcircle()
     
 
     def collisionwithcircle(self):
+        #this the direction vector of the ball
         dx,dy = (self.rect.centerx -266,self.rect.centery-266)
         dist = (dx**2 +dy**2)**0.5 
-        
-        if(dist >= 250 - self.rect.size[0]/2 +1):
-            print "collision"
-            self.speed = -self.speed
-            tangent = math.atan2(dy, dx)
+        maxdist = 250 - self.rect.size[0]/2 +1
+        print dist, maxdist
+        #dx and dy are the direction vectors from center of circle 
+        # self.speedx , self.speedy are the velocity vectors
+        if(dist > maxdist): 
+            print "collision occurred"
+            magofdirection = math.hypot(dx, dy)
+            if(magofdirection == 0):
+                magofdirection = 1
+            unitvectorx = float(dx/magofdirection)
+            unitvectory = float(dy/magofdirection)
+            dotproduct = self.speedx*unitvectorx + self.speedy*unitvectory
+            self.speedx = -2*dotproduct*unitvectorx + self.speedx
+            self.speedy = -2*dotproduct*unitvectory + self.speedy
+
             
     def display(self):
         global screen
@@ -78,6 +95,7 @@ class Background():
         #use it to produce game-over effects for few seconds
         #self.color = self.colorobj.randomcolor()
         pygame.draw.circle(screen, self.color, (self.x,self.y), self.size, self.width)
+
 
 class Bat(pygame.sprite.Sprite):
     def __init__(self,color,batdimension,startpos,speed):
